@@ -1,0 +1,7 @@
+FROM python:3.8-buster
+COPY . /app
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+COPY . .
+CMD ["uvicorn", "main:app", "--reload"]
