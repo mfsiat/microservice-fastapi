@@ -14,3 +14,7 @@ redis = get_redis_connection(
 @app.get("/")
 async def root():
   return {"message" : "Hello Siat"}
+
+# if __name__ == "__main__":
+#     # db.create_all()
+#     app.run(debug=True, host="0.0.0.0")

@@ -1,9 +1,9 @@
-# docker-compose.yml
 version: "3"
 services:
-  web:
+  inventory:
     build: .
+    command: uvicorn main:app --reload --host 0.0.0.0
     volumes:
       - .:/app
     ports:
-      - 8221:8221
+      - 8001:8000
