@@ -36,7 +36,18 @@ async def root():
 # get req for products
 @app.get('/api/v1/products')
 def all():
-  return Product.all_pks()
+  return [format(pk) for pk in Product.all_pks()]
+
+# return all data from redis
+def format(pk: str):
+  product = Product.get(pk)
+
+  return {
+    'id': product.pk,
+    'name': product.name,
+    'price': product.price,
+    'quantity': product.quantity
+  }
 
 # create the product
 @app.post('/api/v1/products')
