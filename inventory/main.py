@@ -1,7 +1,15 @@
 from fastapi import FastAPI
-from redis_om import get_redis_connection
+from fastapi.middleware.cors import CORSMiddleware
+from redis_om import HashModel, get_redis_connection
 
 app = FastAPI()
+
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=['http://localhost:3000'],
+  allow_methods=['*'],
+  allow_headers=['*']
+)
 
 # init redis
 redis = get_redis_connection(
@@ -11,10 +19,21 @@ redis = get_redis_connection(
   decode_responses=True
 )
 
+# create the model for redis to connect
+class Product(HashModel):
+  name: str
+  price: float 
+  quantity: int
+
+  class Meta: 
+    database = redis
+
 @app.get("/")
 async def root():
   return {"message" : "Hello Siat"}
 
-# if __name__ == "__main__":
-#     # db.create_all()
-#     app.run(debug=True, host="0.0.0.0")
+
+# get req for products
+@app.get('/api/v1/products')
+def all():
+  return Product.all_pks()
