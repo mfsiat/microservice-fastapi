@@ -53,3 +53,13 @@ def format(pk: str):
 @app.post('/api/v1/products')
 def create(product: Product):
   return product.save()
+
+# get by id
+@app.get('/api/v1/products/{pk}')
+def get(pk: str):
+  return Product.get(pk)
+
+# delete data 
+@app.delete('/api/v1/products/{pk}')
+def delete(pk: str):
+  return Product.delete(pk)
