@@ -37,3 +37,8 @@ async def root():
 @app.get('/api/v1/products')
 def all():
   return Product.all_pks()
+
+# create the product
+@app.post('/api/v1/products')
+def create(product: Product):
+  return product.save()
