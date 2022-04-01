@@ -1,7 +1,15 @@
 from fastapi import FastAPI
-from redis_om import get_redis_connection
+from fastapi.middleware.cors import CORSMiddleware
+from redis_om import HashModel, get_redis_connection
 
 app = FastAPI()
+
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=['http://localhost:3000'],
+  allow_methods=['*'],
+  allow_headers=['*']
+)
 
 # init redis
 redis = get_redis_connection(
@@ -11,10 +19,47 @@ redis = get_redis_connection(
   decode_responses=True
 )
 
+# create the model for redis to connect
+class Product(HashModel):
+  name: str
+  price: float 
+  quantity: int
+
+  class Meta: 
+    database = redis
+
 @app.get("/")
 async def root():
   return {"message" : "Hello Siat"}
 
-# if __name__ == "__main__":
-#     # db.create_all()
-#     app.run(debug=True, host="0.0.0.0")
+
+# get req for products
+@app.get('/api/v1/products')
+def all():
+  return [format(pk) for pk in Product.all_pks()]
+
+# return all data from redis
+def format(pk: str):
+  product = Product.get(pk)
+
+  return {
+    'id': product.pk,
+    'name': product.name,
+    'price': product.price,
+    'quantity': product.quantity
+  }
+
+# create the product
+@app.post('/api/v1/products')
+def create(product: Product):
+  return product.save()
+
+# get by id
+@app.get('/api/v1/products/{pk}')
+def get(pk: str):
+  return Product.get(pk)
+
+# delete data 
+@app.delete('/api/v1/products/{pk}')
+def delete(pk: str):
+  return Product.delete(pk)
