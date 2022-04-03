@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from redis_om import HashModel, get_redis_connection
+from starlette.requests import Request
 
 app = FastAPI()
 
@@ -17,3 +18,18 @@ redis = get_redis_connection(
   password="H21OzG3kvmL2kyewXqOBABtsITUcunMl",
   decode_responses=True
 )
+
+class Order(HashModel):
+  product_id: str
+  price: float
+  fee: float
+  total: float
+  quantity: int
+  status: str # pending, completed, refunded
+
+  class Meta: 
+    database = redis
+
+@app.post('/api/v1/orders')
+async def create(request: Request): # id, quantity
+  body = await request.json()
