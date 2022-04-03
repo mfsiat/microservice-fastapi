@@ -6,7 +6,14 @@ app = FastAPI()
 
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=['http://localhost:3000']
-  allow_methods=['*']
+  allow_origins=['http://localhost:3000'],
+  allow_methods=['*'],
   allow_headers=['*']
+)
+
+redis = get_redis_connection(
+  host="redis-13515.c252.ap-southeast-1-1.ec2.cloud.redislabs.com",
+  port=13515,
+  password="H21OzG3kvmL2kyewXqOBABtsITUcunMl",
+  decode_responses=True
 )
