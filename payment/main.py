@@ -1,3 +1,4 @@
+import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from redis_om import HashModel, get_redis_connection
@@ -33,3 +34,19 @@ class Order(HashModel):
 @app.post('/api/v1/orders')
 async def create(request: Request): # id, quantity
   body = await request.json()
+
+  req = requests.get('http://127.0.0.1:8001/api/v1/products/%s' % body['id'])
+
+  product = req.json()
+
+  order = Order(
+    product_id = body['id'],
+    price = product['price'],
+    fee = 0.2 * product['price'],
+    total = 1.2 * product['price'],
+    quantity = body['quantity'],
+    status = 'pending'
+  )
+  order.save()
+
+  return order
