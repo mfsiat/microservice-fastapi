@@ -35,7 +35,7 @@ class Order(HashModel):
 async def create(request: Request): # id, quantity
   body = await request.json()
 
-  req = requests.get('http://127.0.0.1:8001/api/v1/products/%s' % body['id'])
+  req = requests.get('http://localhost:8001/api/v1/products/%s' % body['id'])
 
   product = req.json()
 
@@ -49,4 +49,11 @@ async def create(request: Request): # id, quantity
   )
   order.save()
 
+  order_completed(order)
+
   return order
+
+
+def order_completed(order: Order):
+  order.status = 'completed'
+  order.save()
