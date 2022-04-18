@@ -1,7 +1,6 @@
 import time
 
 import requests
-from colorama import Back
 from fastapi import FastAPI
 from fastapi.background import BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,6 +34,10 @@ class Order(HashModel):
   class Meta: 
     database = redis
 
+@app.get('/api/v1/orders/{pk}')
+def get(pk: str):
+  return Order.get(pk)
+
 @app.post('/api/v1/orders')
 async def create(request: Request, backgroud_tasks: BackgroundTasks): # id, quantity
   body = await request.json()
@@ -62,5 +65,7 @@ async def create(request: Request, backgroud_tasks: BackgroundTasks): # id, quan
 
 
 def order_completed(order: Order):
-  order.status = 'completed'
-  order.save()
+    time.sleep(5)
+    order.status = 'completed'
+    order.save()
+    redis.xadd('order_completed', order.dict(), '*')
