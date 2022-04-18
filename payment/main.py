@@ -1,4 +1,9 @@
+import time
+
+import requests
+from colorama import Back
 from fastapi import FastAPI
+from fastapi.background import BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from redis_om import HashModel, get_redis_connection
 from starlette.requests import Request
@@ -31,5 +36,31 @@ class Order(HashModel):
     database = redis
 
 @app.post('/api/v1/orders')
-async def create(request: Request): # id, quantity
+async def create(request: Request, backgroud_tasks: BackgroundTasks): # id, quantity
   body = await request.json()
+
+  url = 'http://localhost:8001/api/v1/products/%s'
+  req = requests.get(url % body['id'], verify=False)
+
+  product = req.json()
+
+  order = Order(
+    product_id = body['id'],
+    price = product['price'],
+    fee = 0.2 * product['price'],
+    total = 1.2 * product['price'],
+    quantity = body['quantity'],
+    status = 'pending'
+  )
+  order.save()
+
+  backgroud_tasks.add_task(order_completed, order)
+
+  order_completed(order)
+
+  return order
+
+
+def order_completed(order: Order):
+  order.status = 'completed'
+  order.save()
